@@ -26,7 +26,7 @@ public class Sessao {
 	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	private DateTime inicio;
 
-	private Integer duracaoEmMinutos;
+	private Integer duracaoEmMinutos = 0;
 
 	private Integer totalIngressos = 0;
 
@@ -91,15 +91,10 @@ public class Sessao {
 		return totalIngressos - ingressosReservados;
 	}
 	
-	// Era usada antes no sistema para avisar o cliente de que
-    // os ingressos estavam acabando!
-    // Hoje nao serve pra nada, mas eh sempre bom ter
-    // um backup guardado! ;)
-    public boolean pertoDoLimiteDeSeguranca_NaoUtilizada()
-    {
-            int limite = 3;
-            return getIngressosDisponiveis() > limite;
-    }
+	private double getPercentualIngressosDisponiveis() {
+		return getIngressosDisponiveis() / totalIngressos.doubleValue();
+	}
+	
 
 	public void reserva(Integer numeroDeIngressos) {
 		// soma quantidade na variavel ingressos reservados
@@ -108,7 +103,7 @@ public class Sessao {
 
 	public boolean podeReservar(Integer numeroDeIngressos) {
 		int sobraram = getIngressosDisponiveis() - numeroDeIngressos;
-        boolean naoTemEspaco = sobraram <= 0;
+        boolean naoTemEspaco = sobraram < 0;
 
         return !naoTemEspaco;
 	}
@@ -121,4 +116,26 @@ public class Sessao {
 		return preco;
 	}
 	
+	public BigDecimal calculaPrecoFinal() {
+		BigDecimal acrescimo = BigDecimal.ZERO;
+		if (deveAplicarAcrescimoDeVagas())
+			acrescimo = acrescimo.add(espetaculo.getAcrescimoDeVagas());
+		if (deveAplicarAcrescimoDeDuracao())
+			acrescimo = acrescimo.add(espetaculo.getAcrescimoDeDuracao());
+		System.out.println("Acrescimo: " + acrescimo);
+		return preco.add(preco.multiply(acrescimo));
+	}
+
+	public boolean deveAplicarAcrescimoDeVagas() {
+		return getPercentualIngressosDisponiveis() <= espetaculo.getLimitePercentualDeVagasParaAcrescimo();
+	}
+
+	public boolean deveAplicarAcrescimoDeDuracao() {
+		if (duracaoEmMinutos == null) 
+			return false;
+		else {
+			int limiteTempoParaAcrescimo = espetaculo.getLimiteTempoParaAcrescimo();
+			return duracaoEmMinutos > limiteTempoParaAcrescimo;
+		}
+	}
 }
