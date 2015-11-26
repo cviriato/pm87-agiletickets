@@ -1,8 +1,14 @@
 package br.com.caelum.agiletickets.models;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.junit.Test;
 
 public class EspetaculoTest {
@@ -72,7 +78,7 @@ public class EspetaculoTest {
 
 		assertFalse(ivete.Vagas(5, 3));
 	}
-
+	
 	private Sessao sessaoComIngressosSobrando(int quantidade) {
 		Sessao sessao = new Sessao();
 		sessao.setTotalIngressos(quantidade * 2);
@@ -80,5 +86,30 @@ public class EspetaculoTest {
 
 		return sessao;
 	}
+	@Test
+	public void dataInicialDeveSerMenorIgualaDataFinal() {
+	   Sessao sessao = new Sessao();
+	   LocalDate datainicial = new LocalDate(2010,11,3);
+	   LocalDate datafinal = new LocalDate(2010,11,3);
+	   
+	   
+	   datafinal = datafinal.plusDays(3);
+	   int diferencadias = Days.daysBetween(datainicial,datafinal).getDays();
+	   
+	   assertEquals(3,diferencadias );
+	   
+	   
+	}
+	@Test
+	public void criarSessaoComDatasIguais() {
+      Espetaculo espetaculo = new Espetaculo();
+	  LocalDate datainicial = new LocalDate(2010,11,3);
+	  LocalDate datafinal = new LocalDate(2010,11,3);
+	  
+	  LocalTime horario = new LocalTime(22,0,0);
 	
+	  List<Sessao> sessoes =  espetaculo.criaSessoes(datainicial, datafinal, horario, Periodicidade.DIARIA);
+	  
+	  assertEquals(sessoes.size(),1);
+	}
 }
